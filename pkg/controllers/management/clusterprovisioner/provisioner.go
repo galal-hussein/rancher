@@ -239,6 +239,7 @@ func (p *Provisioner) reconcileCluster(cluster *v3.Cluster, create bool) (*v3.Cl
 	if create {
 		logrus.Infof("Creating cluster [%s]", cluster.Name)
 		apiEndpoint, serviceAccountToken, caCert, err = p.driverCreate(cluster, *spec)
+		logrus.Infof("hgalal logs: [%s] err: %v", cluster.Name, err)
 		if err != nil && err.Error() == "cluster already exists" {
 			logrus.Infof("Create done, Updating cluster [%s]", cluster.Name)
 			apiEndpoint, serviceAccountToken, caCert, err = p.driverUpdate(cluster, *spec)

@@ -152,7 +152,8 @@ func (c *Cluster) createInner(ctx context.Context) error {
 		logrus.Errorf("Cluster %s previously failed to create", c.Name)
 		info = toInfo(c)
 	}
-
+	logrus.Infof("hgalal logs, cluster [%s] state in kontainer engine: %s", c.Name, c.Status)
+	logrus.Infof("hgalal logs, cluster [%s] object %#v", c.Name, c)
 	if c.Status == Updating || c.Status == Running || c.Status == PostCheck {
 		logrus.Infof("Cluster %s already exists.", c.Name)
 		return ErrClusterExists
