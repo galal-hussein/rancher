@@ -148,6 +148,9 @@ func (c *Cluster) createInner(ctx context.Context) error {
 	c.restore()
 
 	var info *types.ClusterInfo
+	if c.Status == "" {
+		info = toInfo(c)
+	}
 	if c.Status == Error {
 		logrus.Errorf("Cluster %s previously failed to create", c.Name)
 		info = toInfo(c)

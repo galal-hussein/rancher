@@ -94,6 +94,7 @@ func (p *Provisioner) Remove(cluster *v3.Cluster) (*v3.Cluster, error) {
 }
 
 func (p *Provisioner) Updated(cluster *v3.Cluster) (*v3.Cluster, error) {
+	logrus.Infof("hgalal logs, within Update cluster [%s]", cluster.Name)
 	obj, err := v3.ClusterConditionUpdated.Do(cluster, func() (runtime.Object, error) {
 		setVersion(cluster)
 		return p.update(cluster, false)
@@ -138,7 +139,7 @@ func (p *Provisioner) machineChanged(key string, machine *v3.Node) error {
 
 func (p *Provisioner) Create(cluster *v3.Cluster) (*v3.Cluster, error) {
 	var err error
-
+	logrus.Infof("hgalal logs, within Create cluster [%s]", cluster.Name)
 	// Initialize conditions, be careful to not continually update them
 	v3.ClusterConditionPending.CreateUnknownIfNotExists(cluster)
 	v3.ClusterConditionProvisioned.CreateUnknownIfNotExists(cluster)
