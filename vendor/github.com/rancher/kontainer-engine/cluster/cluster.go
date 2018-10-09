@@ -146,7 +146,7 @@ func (c *Cluster) postCheck(ctx context.Context) error {
 func (c *Cluster) createInner(ctx context.Context) error {
 	// check if it is already created
 	c.restore()
-
+	logrus.Infof("Cluster %s: %#v, state: %s", c.Name, c, c.Status)
 	var info *types.ClusterInfo
 	if c.Status == "" {
 		info = toInfo(c)
