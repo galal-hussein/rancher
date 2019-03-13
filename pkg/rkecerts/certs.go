@@ -2,6 +2,7 @@ package rkecerts
 
 import (
 	"bytes"
+	"crypto/md5"
 	"crypto/rsa"
 	"crypto/x509"
 	"io/ioutil"
@@ -174,6 +175,26 @@ func (b *Bundle) Explode() error {
 	}
 
 	return f.err()
+}
+
+func (b *Bundle) Changed() bool {
+	var newCertPEM string
+	for _, item := range b.certs {
+		oldCertPEM, err := ioutil.ReadFile(item.Path)
+		if err != nil {
+			return false
+		}
+		if item.Certificate != nil {
+			newCertPEM = string(cert.EncodeCertPEM(item.Certificate))
+		}
+		oldCertChecksum := fmt.Sprintf("%x", md5.Sum([]byte(oldCertPEM)))
+		newCertChecksum := fmt.Sprintf("%x", md5.Sum([]byte(newCertPEM)))
+
+		if oldCertChecksum != newCertChecksum {
+			return true
+		}
+	}
+	return false
 }
 
 type fileWriter struct {
