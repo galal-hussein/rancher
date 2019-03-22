@@ -1,12 +1,19 @@
 package pki
 
 import (
+	"crypto/rand"
+	cryptorand "crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
+	"crypto/x509/pkix"
+	"errors"
 	"fmt"
+	"math"
+	"math/big"
 	"net"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/rancher/rke/hosts"
 	"github.com/rancher/types/apis/management.cattle.io/v3"
@@ -44,7 +51,7 @@ func GenerateSignedCertAndKey(
 		Usages:       usages,
 		AltNames:     *altNames,
 	}
-	clientCert, err := cert.NewSignedCert(caConfig, rootKey, caCrt, caKey)
+	clientCert, err := NewSignedCert(caConfig, rootKey, caCrt, caKey)
 	if err != nil {
 		return nil, nil, fmt.Errorf("Failed to generate %s certificate: %v", commonName, err)
 	}
@@ -292,4 +299,36 @@ func strCrtToEnv(crtName, crt string) string {
 func strKeyToEnv(crtName, key string) string {
 	envName := getEnvFromName(crtName)
 	return fmt.Sprintf("%s=%s", getKeyEnvFromEnv(envName), key)
+}
+
+func NewSignedCert(cfg cert.Config, key *rsa.PrivateKey, caCert *x509.Certificate, caKey *rsa.PrivateKey) (*x509.Certificate, error) {
+	serial, err := rand.Int(rand.Reader, new(big.Int).SetInt64(math.MaxInt64))
+	if err != nil {
+		return nil, err
+	}
+	if len(cfg.CommonName) == 0 {
+		return nil, errors.New("must specify a CommonName")
+	}
+	if len(cfg.Usages) == 0 {
+		return nil, errors.New("must specify at least one ExtKeyUsage")
+	}
+
+	certTmpl := x509.Certificate{
+		Subject: pkix.Name{
+			CommonName:   cfg.CommonName,
+			Organization: cfg.Organization,
+		},
+		DNSNames:     cfg.AltNames.DNSNames,
+		IPAddresses:  cfg.AltNames.IPs,
+		SerialNumber: serial,
+		NotBefore:    caCert.NotBefore,
+		NotAfter:     time.Now().Add(30 * time.Minute).UTC(),
+		KeyUsage:     x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+		ExtKeyUsage:  cfg.Usages,
+	}
+	certDERBytes, err := x509.CreateCertificate(cryptorand.Reader, &certTmpl, caCert, key.Public(), caKey)
+	if err != nil {
+		return nil, err
+	}
+	return x509.ParseCertificate(certDERBytes)
 }
