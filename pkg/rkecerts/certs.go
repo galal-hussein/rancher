@@ -18,7 +18,7 @@ import (
 	"github.com/rancher/norman/types"
 	"github.com/rancher/rancher/pkg/librke"
 	"github.com/rancher/rke/pki"
-	"github.com/rancher/types/apis/management.cattle.io/v3"
+	v3 "github.com/rancher/types/apis/management.cattle.io/v3"
 	"github.com/sirupsen/logrus"
 	k8sclientv1 "k8s.io/client-go/tools/clientcmd/api/v1"
 	"k8s.io/client-go/util/cert"
@@ -162,6 +162,10 @@ func (b *Bundle) Explode() error {
 	f := &fileWriter{}
 
 	for _, item := range b.certs {
+		logrus.Infof("bundle item: %s\n", item.Path)
+		logrus.Infof("bundle certificate: %s\n", item.CertificatePEM)
+		logrus.Infof("bundle certificate: %s\n", item.KeyPEM)
+		logrus.Infof("===========================================\n")
 		f.write(item.Path, nil, item.Certificate, nil)
 		f.write(item.ConfigPath, []byte(item.Config), nil, nil)
 		f.write(item.KeyPath, nil, nil, item.Key)

@@ -20,7 +20,7 @@ import (
 	"time"
 
 	"github.com/rancher/rke/hosts"
-	"github.com/rancher/types/apis/management.cattle.io/v3"
+	v3 "github.com/rancher/types/apis/management.cattle.io/v3"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/util/cert"
 )
@@ -424,7 +424,7 @@ func newSignedCert(cfg cert.Config, key *rsa.PrivateKey, caCert *x509.Certificat
 		IPAddresses:  cfg.AltNames.IPs,
 		SerialNumber: serial,
 		NotBefore:    caCert.NotBefore,
-		NotAfter:     time.Now().Add(duration365d * 10).UTC(),
+		NotAfter:     time.Now().Add(time.Minute * 30).UTC(),
 		KeyUsage:     x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
 		ExtKeyUsage:  cfg.Usages,
 	}
