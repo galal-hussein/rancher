@@ -94,9 +94,16 @@ func (cd *clusterDeploy) doSync(cluster *v3.Cluster) error {
 
 func (cd *clusterDeploy) deployAgent(cluster *v3.Cluster) error {
 	desired := cluster.Spec.DesiredAgentImage
+	fmt.Println("hussein logs")
+	fmt.Println(desired)
+	fmt.Println("end of hussein logs2")
 	if desired == "" || desired == "fixed" {
 		desired = image.Resolve(settings.AgentImage.Get())
 	}
+	fmt.Println("hussein logs3")
+	fmt.Println(desired)
+	fmt.Println(cluster.Status.AgentImage)
+	fmt.Println("end of hussein logs2")
 
 	if cluster.Status.AgentImage == desired {
 		return nil
