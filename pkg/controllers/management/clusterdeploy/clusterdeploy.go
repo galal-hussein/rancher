@@ -89,21 +89,19 @@ func (cd *clusterDeploy) doSync(cluster *v3.Cluster) error {
 		return err
 	}
 
+	err = cd.setKubeapiProxyClusterRole(cluster)
+	if err != nil {
+		return err
+	}
+
 	return cd.setNetworkPolicyAnn(cluster)
 }
 
 func (cd *clusterDeploy) deployAgent(cluster *v3.Cluster) error {
 	desired := cluster.Spec.DesiredAgentImage
-	fmt.Println("hussein logs")
-	fmt.Println(desired)
-	fmt.Println("end of hussein logs2")
 	if desired == "" || desired == "fixed" {
 		desired = image.Resolve(settings.AgentImage.Get())
 	}
-	fmt.Println("hussein logs3")
-	fmt.Println(desired)
-	fmt.Println(cluster.Status.AgentImage)
-	fmt.Println("end of hussein logs2")
 
 	if cluster.Status.AgentImage == desired {
 		return nil
@@ -113,9 +111,6 @@ func (cd *clusterDeploy) deployAgent(cluster *v3.Cluster) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("hussein logs deploy cluster agent")
-	fmt.Println(kubeConfig)
-	fmt.Println("end of hussein logs")
 
 	_, err = v3.ClusterConditionAgentDeployed.Do(cluster, func() (runtime.Object, error) {
 		yaml, err := cd.getYAML(cluster, desired)
@@ -197,8 +192,24 @@ func (cd *clusterDeploy) getYAML(cluster *v3.Cluster, agentImage string) ([]byte
 	}
 
 	buf := &bytes.Buffer{}
-	fmt.Println("husssein- executing the system template...............")
 	err = systemtemplate.SystemTemplate(buf, agentImage, token, url)
 
 	return buf.Bytes(), err
+}
+
+func (cd *clusterDeploy) setKubeapiProxyClusterRole(cluster *v3.Cluster) error {
+	kubeConfig, err := cd.getKubeConfig(cluster)
+	if err != nil {
+		return err
+	}
+	for i := 0; i < 3; i++ {
+		// This will fail almost always the first time because when we create the namespace in the file
+		// it won't have privileges.  Just stupidly try 3 times
+		_, err := kubectl.Apply([]byte(systemtemplate.KubeapiProxytemplate), kubeConfig)
+		if err == nil {
+			break
+		}
+		time.Sleep(2 * time.Second)
+	}
+	return err
 }
