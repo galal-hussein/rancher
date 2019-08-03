@@ -6,6 +6,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: proxy-clusterrole-kubeapiserver
+  labels:
+    cattle.io/creator: "norman"
 rules:
 - apiGroups: [""]
   resources:
@@ -17,6 +19,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: proxy-role-binding-kubernetes-master
+  labels:
+    cattle.io/creator: "norman"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
