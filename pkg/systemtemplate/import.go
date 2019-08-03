@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/base64"
 	"encoding/hex"
+	"fmt"
 	"text/template"
 
 	"io"
@@ -39,7 +40,7 @@ func SystemTemplate(resp io.Writer, agentImage, token, url string) error {
 		URL:        base64.StdEncoding.EncodeToString([]byte(url)),
 		URLPlain:   url,
 	}
-
+	fmt.Println(t)
 	return t.Execute(resp, context)
 }
 

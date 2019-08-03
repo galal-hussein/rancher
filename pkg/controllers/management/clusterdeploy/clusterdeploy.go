@@ -183,6 +183,7 @@ func (cd *clusterDeploy) getYAML(cluster *v3.Cluster, agentImage string) ([]byte
 	}
 
 	buf := &bytes.Buffer{}
+	fmt.Println("husssein- executing the system template...............")
 	err = systemtemplate.SystemTemplate(buf, agentImage, token, url)
 
 	return buf.Bytes(), err
