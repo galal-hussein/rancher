@@ -106,9 +106,16 @@ func (cd *clusterDeploy) deployAgent(cluster *v3.Cluster) error {
 	if err != nil {
 		return err
 	}
+	fmt.Println("hussein logs deploy cluster agent")
+	fmt.Println(kubeConfig)
+	fmt.Println("end of hussein logs")
 
 	_, err = v3.ClusterConditionAgentDeployed.Do(cluster, func() (runtime.Object, error) {
 		yaml, err := cd.getYAML(cluster, desired)
+		fmt.Println("hussein logs")
+		fmt.Println(yaml)
+		fmt.Println(err)
+		fmt.Println("end of hussein logs")
 		if err != nil {
 			return cluster, err
 		}
